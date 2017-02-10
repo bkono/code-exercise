@@ -22,4 +22,9 @@ business cases that app should be addressing, I'm going to make a few different 
 codebase with various areas of focus. Where there are questions, I'll call out assumptions made on
 behalf of the fictional stakeholders.
 
-- [] Pass 1, simple refactoring for style guidelines and clarity
+- [x] Pass 1, simple refactoring and cleanup of model and controller's existing logic
+- [ ] Pass 2, view cleanup, possibly introduce a Presenter pattern given the excessive logic
+- [ ] Pass 3, "uncover" business logic of sufficient complexity to warrant additions of service
+    objects (ie: task POROs), other common significant application dependencies and structures
+- [ ] Pass 4, make it a real rails app so we can introduce testing. Flying blind is no fun at all.
+    Not a fan of cowboy refactors without any test coverage (see Pass 1)

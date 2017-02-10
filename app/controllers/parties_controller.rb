@@ -35,7 +35,7 @@ class PartiesController < ApplicationController
   end
 
   def party_param
-    params[:party[:numgsts]] ||= 0 if params[:party]
+    params[:party][:numgsts] ||= 0 if params[:party]
     params.require(:party)
   end
 end
