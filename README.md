@@ -14,3 +14,12 @@ You should assume the technology stack used for this code includes:
 Refactor and improve the code.  Add directories/files as needed.
 
 You are not expected to run the code or make this work as a real Rails application.
+
+## Refactorer's Notes
+
+Given the instructions are simply to refactor and improve, without specific input on any of the
+business cases that app should be addressing, I'm going to make a few different passes through the
+codebase with various areas of focus. Where there are questions, I'll call out assumptions made on
+behalf of the fictional stakeholders.
+
+- [] Pass 1, simple refactoring for style guidelines and clarity

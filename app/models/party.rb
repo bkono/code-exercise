@@ -14,38 +14,40 @@
 # descript      - text         - default NULL
 #
 class Party < ApplicationRecord
+  after_initialize :set_defaults
+  before_save :clean_guest_names # AR callbacks are dirty in general, should refactor to a setter
 
   validate :validations
+  validate :must_start_before_it_ends
+  validate :must_name_all_guests
+  validate :location, length: { minimum: 1, message: "Where is the party?" },
+    if: -> { venue.length > 0 }
 
-  def validations
-    if host_name.length<255 || host_email.length<255 || venue.length<255 || location.size<255 || theme.size<255
-      errors.add(:base,"Input was too long.")
+  %i{host_name host_email venue location theme}.each do |attr|
+    validate attr, length: {maximum: 255}
+  end
+
+  def must_start_before_it_ends
+    if self[:when] > when_its_over
+      errors.add("Party cannot start after it ends")
     end
-    # ruby doesn't like us using when as column name for some reason
-    if self[:when]>when_its_over
-      errors.add(:base,"Incorrect party time.")
-    end
-    if numgsts.nil?
-      numgsts = 0
-    end
-    if venue.length > 0 && location.length < 0
-      errors.add(:location,"Where is the party?")
-    end
+  end
+
+  def must_name_all_guests
     if guest_names.split(',').size != numgsts
       errors.add(:guest_names,"Missing guest name")
     end
   end
 
-  def after_save
-    # clean "Harry S. Truman" guest name to "Harry S._Truman"
-    # clean "Roger      Rabbit" guest name to "Roger Rabbit"
-    gnames = []
-    guest_names.split(',').each do |g|
+  def set_defaults
+    self.numgsts ||= 0
+  end
+
+  def clean_guest_names
+    self.guest_names = self.guest_names.split(',').map do |g|
       g.squeeze!
       names=g.split(' ')
-      gnames << "#{names[0]} #{names[1..-1].join('_')}"
+      "#{names[0]} #{names[1..-1].join('_')}"
     end
-    guest_names = gnames
-    save!
   end
 end

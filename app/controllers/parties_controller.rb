@@ -1,43 +1,41 @@
 class PartiesController < ApplicationController
   def index
-    @parties = Array.new
+    # originally refactored for style, such as removing if ! (dangerous style) and removal of
+    # unnecessary in-memory iterations and allocs, then realized with
+    # proper default values, the if branching was completely unnecessary
 
-    if !params[:sort].blank?
-      order = "#{params[:sort]} #{(params[:asc].blank? || params[:asc] == 'true') ? 'DESC' : 'ASC'}"
-      Party.order(order).all.each do |party|
-        @parties << party
-      end
-    else
-      order = "when #{(params[:asc].blank? || params[:asc] == 'true') ? 'DESC' : 'ASC'}"
-      @parties = Party.order(order).all
-    end
+    order = "#{sort_param} #{sort_direction}"
+    @parties = Party.order(order).all
   end
 
   def new
     @party = Party.new
-    # so the view shows 0 and not blank
-    @party.numgsts = 0
   end
 
   def create
-    @party = Party.new
-    if params[:party][:numgsts].blank?
-      params[:party][:numgsts]=0
-    end
-
-    @party.attributes = params[:party]
+    @party = Party.new(party_param) # strong_params need love too
+    @party.when_its_over=@party.when.end_of_day if @party.when_its_over.blank?
 
     if @party.save
-      # if end is blank, set to end of day
-      if @party.when_its_over.blank?
-        @party.when_its_over=@party.when.end_of_day
-        @party.save
-      end
-      @party.after_save
       redirect_to parties_url
     else
       flash[:notice]="Party was incorrect."
       redirect_to new_party_url
     end
+  end
+
+  private
+  def sort_param
+    params.fetch(:sort, 'when')
+  end
+
+  def sort_direction
+    # addressing the awkward :asc == 'true' returns 'DESC' logic. appeared to be an inverted bug
+    params.fetch(:asc, 'false') == 'true' ? 'ASC' : 'DESC'
+  end
+
+  def party_param
+    params[:party[:numgsts]] ||= 0 if params[:party]
+    params.require(:party)
   end
 end
